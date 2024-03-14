@@ -1,17 +1,16 @@
-<script>
-export default {
-  name: 'PlacesCard',
-  props: {
-    displayName: {
-      type: String,
-      required: true
-    },
-    formattedAddress: {
-      type: String,
-      required: true
-    }
+<script setup>
+import { defineProps } from 'vue'
+
+const props = defineProps({
+  displayName: {
+    type: String,
+    required: true
+  },
+  formattedAddress: {
+    type: String,
+    required: true
   }
-}
+})
 </script>
 
 <template>
