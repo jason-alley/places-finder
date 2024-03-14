@@ -15,17 +15,23 @@ onMounted(() => {
 });
 
 
-/**
- * @description This function filters the search results by postal code value that the user enters.
- * @returns {Array} filteredData
- */
-const filterPlaces = () => {
-    const newPostalCodes =  postalCode.value.split(',');
 
-    // for each postal code entered, filter the results by the postal code.
-   const filteredData = results.value.places.filter(place => newPostalCodes.some(postalCode => place.formattedAddress.includes(postalCode)));
-   
+/**
+ * Filter places based on postal codes
+ *
+ * @returns {Array} - The filtered array of places
+ */
+const filterPlaces = async () => {
+    // Split the postal code string into an array of postal codes
+    const newPostalCodes = postalCode.value.split(',');
+
+    // Filter the places based on whether any postal code in the array is included in the place's formatted address
+    const filteredData = results.value.places.filter(place => newPostalCodes.some(postalCode => place.formattedAddress.includes(postalCode)));
+
+    // Update the filtered results with the filtered data
     filteredResults.value = filteredData;
+
+    // Return the filtered data
     return filteredData;
 };
 
@@ -67,7 +73,7 @@ const searchPlaces = () => {
         .then(data => {
             results.value = data;
             console.log(results.value);
-            localStorage.setItem('searchResults', JSON.stringify(data)); 
+            localStorage.setItem('searchResults', JSON.stringify(data));
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
@@ -105,23 +111,20 @@ const exportToCsv = () => {
             <input type="text" v-model="search" placeholder="Search for places" />
             <input type="text" v-model="postalCode" placeholder="Enter postal code" />
             <button type="submit" class="pure-button pure-button-primary">Search</button>
-            <button class="pure-button pure-button-primary" @click="filterPlaces(), displayFiltered = !displayFiltered">Filter</button>
+            <button class="pure-button pure-button-primary"
+                @click="filterPlaces(), displayFiltered = !displayFiltered">Filter</button>
         </fieldset>
     </form>
     <section>
         <h2>Results</h2>
         <div v-if="displayFiltered">
-            <PlacesCard v-for="place in filteredResults"
-                :key="filteredResults.indexOf(place)"
-                :displayName="place.displayName.text"
-                :formattedAddress="place.formattedAddress"
+            <PlacesCard v-for="place in filteredResults" :key="filteredResults.indexOf(place)"
+                :displayName="place.displayName.text" :formattedAddress="place.formattedAddress"
                 :websiteUri="place.websiteUri" />
         </div>
         <div v-else>
-            <PlacesCard v-for="place in results.places"
-                :key="results.places.indexOf(place)"
-                :displayName="place.displayName.text" 
-                :formattedAddress="place.formattedAddress" 
+            <PlacesCard v-for="place in results.places" :key="results.places.indexOf(place)"
+                :displayName="place.displayName.text" :formattedAddress="place.formattedAddress"
                 :websiteUri="place.websiteUri" />
         </div>
 
