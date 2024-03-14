@@ -1,118 +1,128 @@
-<script>
+<script setup>
 import PlacesCard from './PlacesCard.vue';
 
+import { ref, onMounted } from 'vue';
 
-export default {
-    data() {
-        return {
-            filtered: false,
-            search: '',
-            results: '',
-            filteredResults: { places: [] },
-            postalCode: ''
-        }
-    },
-    components: {
-        PlacesCard
-    },
+const search = ref('');
+const postalCode = ref('');
+const results = ref([]);
+const filteredResults = ref([]);
+let displayFiltered = ref(false);
 
-    methods: {
+onMounted(() => {
+    // on mounted clear local storage.
+    localStorage.clear();
+});
 
-        // This methods exports filteredResults to a csv file.
-        exportToCsv() {
-            const items = this.filteredResults.places;
-            const replacer = (key, value) => value === null ? '' : value;
-            const header = Object.keys(items[0]);
-            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
-            csv.unshift(header.join(','));
-            csv = csv.join('\r\n');
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('hidden', '');
-            a.setAttribute('href', url);
-            a.setAttribute('download', 'places.csv');
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        },
 
-        /**
-         * This method filters the places data based on the provided postal code.
-         * 
-         */
-        filterPlaces() {
-            this.filtered = true;
-            const filteredData = this.results.places.filter(obj => obj.formattedAddress.includes(this.postalCode));
-            this.filteredResults.places = filteredData;
-            return filteredData;
-        },
+/**
+ * @description This function filters the search results by postal code value that the user enters.
+ * @returns {Array} filteredData
+ */
+const filterPlaces = () => {
+    const newPostalCodes =  postalCode.value.split(',');
 
-        searchPlaces() {
-            this.filtered = false;
-            const apiKey = 'AIzaSyAEAPVrCILuoMxjcn0V2sVS_qVgJ6LFsDQ';
-            const url = 'https://places.googleapis.com/v1/places:searchText';
-            const requestBody = {
-                textQuery: this.search,
-            };
+    // for each postal code entered, filter the results by the postal code.
+   const filteredData = results.value.places.filter(place => newPostalCodes.some(postalCode => place.formattedAddress.includes(postalCode)));
+   
+    filteredResults.value = filteredData;
+    return filteredData;
+};
 
-            // if the search results are already in local storage, use them instead of making a new request.
-            if (localStorage.getItem('searchResults') === this.results) {
-                this.results = JSON.parse(localStorage.getItem('searchResults'));
-                return;
-            }
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Goog-Api-Key': apiKey,
-                    'X-Goog-FieldMask': 'places.displayName,places.formattedAddress'
-                },
-                body: JSON.stringify(requestBody)
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('searching', data);
-                    this.results = data;
-                    localStorage.setItem('searchResults', JSON.stringify(data)); // Adding data to local storage
-                    console.log(localStorage.getItem('searchResults'));
-                })
-                .catch(error => {
-                    console.error('There was a problem with the fetch operation:', error);
-                });
-        },
-        mounted() {
-            // clear local storage on page load.
-            localStorage.clear();
-        }
+/**
+ * @description This function makes a request to the Google Places API to search for places based on the users input, then returns and array of places with the defined fields.
+ */
+const searchPlaces = () => {
+    const apiKey = 'AIzaSyAEAPVrCILuoMxjcn0V2sVS_qVgJ6LFsDQ';
+    const url = 'https://places.googleapis.com/v1/places:searchText';
+    const requestBody = {
+        textQuery: search.value,
+    };
+
+    // If filtered results are displayed, clear them.
+    // if (displayFiltered) {
+    //     filteredResults.value = [];
+    // }
+
+    // if the search results are already in local storage, use them instead of making a new request.
+    if (localStorage.getItem('searchResults') === results.value) {
+        results.value = JSON.parse(localStorage.getItem('searchResults'));
+        return;
     }
-    };  
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': apiKey,
+            'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.websiteUri,'
+        },
+        body: JSON.stringify(requestBody)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            results.value = data;
+            console.log(results.value);
+            localStorage.setItem('searchResults', JSON.stringify(data)); 
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+
+}
+
+/**
+ * @description This function exports the filtered search results to a CSV file.
+ */
+const exportToCsv = () => {
+    const items = filteredResults.value.places;
+    const replacer = (key, value) => value === null ? '' : value;
+    const header = Object.keys(items[0]);
+    let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
+    csv.unshift(header.join(','));
+    csv = csv.join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'places.csv');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+};
+
 </script>
 
 <template>
-    <form class="pure-form" v-on:submit.prevent="onSubmit">
+    <form class="pure-form" v-on:submit.prevent="searchPlaces">
         <fieldset>
             <legend>Places Finder</legend>
             <input type="text" v-model="search" placeholder="Search for places" />
             <input type="text" v-model="postalCode" placeholder="Enter postal code" />
-            <button type="submit" class="pure-button pure-button-primary" @click="searchPlaces()">Search</button>
-            <button type="submit" class="pure-button pure-button-primary" @click="filterPlaces()">Filter</button>
+            <button type="submit" class="pure-button pure-button-primary">Search</button>
+            <button class="pure-button pure-button-primary" @click="filterPlaces(), displayFiltered = !displayFiltered">Filter</button>
         </fieldset>
     </form>
     <section>
         <h2>Results</h2>
-        <div v-if="filtered">
-            <PlacesCard v-for="place in filteredResults.places" :key="filteredResults.places.indexOf(place)"
-                :displayName="place.displayName.text" :formattedAddress="place.formattedAddress" />
+        <div v-if="displayFiltered">
+            <PlacesCard v-for="place in filteredResults"
+                :key="filteredResults.indexOf(place)"
+                :displayName="place.displayName.text"
+                :formattedAddress="place.formattedAddress"
+                :websiteUri="place.websiteUri" />
         </div>
         <div v-else>
-            <PlacesCard v-for="place in results.places" :key="results.places.indexOf(place)"
-                :displayName="place.displayName.text" :formattedAddress="place.formattedAddress" />
+            <PlacesCard v-for="place in results.places"
+                :key="results.places.indexOf(place)"
+                :displayName="place.displayName.text" 
+                :formattedAddress="place.formattedAddress" 
+                :websiteUri="place.websiteUri" />
         </div>
 
     </section>
