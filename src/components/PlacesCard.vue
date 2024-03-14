@@ -9,6 +9,9 @@ const props = defineProps({
   formattedAddress: {
     type: String,
     required: true
+  },
+  websiteUri: {
+    type: String,
   }
 })
 </script>
@@ -17,6 +20,7 @@ const props = defineProps({
     <div class="card">
         <h2>{{ displayName }}</h2>
         <p>{{ formattedAddress }}</p>
+        <a :href="websiteUri" target="_blank" >{{ websiteUri }}</a>
     </div>
 </template>
 
@@ -26,7 +30,10 @@ const props = defineProps({
     border-radius: 4px;
     padding: 20px;
     margin: 20px;
-    width: 300px;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    overflow-wrap: break-word;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
