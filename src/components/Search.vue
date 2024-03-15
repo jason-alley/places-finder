@@ -58,7 +58,7 @@ const searchPlaces = () => {
         headers: {
             'Content-Type': 'application/json',
             'X-Goog-Api-Key': apiKey,
-            'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.websiteUri,'
+            'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.websiteUri,places.nationalPhoneNumber',
         },
         body: JSON.stringify(requestBody)
     })
@@ -78,48 +78,6 @@ const searchPlaces = () => {
 
 }
 
-
-const testObject = [
-    {
-        "formattedAddress": "5048 Dundas St W, Etobicoke, ON M9A 1B9, Canada",
-        "websiteUri": "https://thehvacservice.ca/etobicoke/",
-        "displayName": {
-            "text": "The HVAC Service",
-            "languageCode": "en"
-        }
-    },
-    {
-        "formattedAddress": "3 Michael Power Pl #1105, Etobicoke, ON M9A 0A2, Canada",
-        "displayName": {
-            "text": "MMS HVAC",
-            "languageCode": "en"
-        }
-    },
-    {
-        "formattedAddress": "70 Annie Craig Dr, Etobicoke, ON M8V 0G2, Canada",
-        "websiteUri": "http://www.sepair.ca/",
-        "displayName": {
-            "text": "Sep Air HVAC Services",
-            "languageCode": "en"
-        }
-    },
-    {
-        "formattedAddress": "80 Marine Parade Dr unit # 1505, Etobicoke, ON M8V 0A3, Canada",
-        "websiteUri": "http://jskheating.com/",
-        "displayName": {
-            "text": "J.S.K. Heating & Cooling LTD",
-            "languageCode": "en"
-        }
-    },
-    {
-        "formattedAddress": "59 Burlington St, Toronto, ON M8V 2L3, Canada",
-        "websiteUri": "https://armanch.ca/",
-        "displayName": {
-            "text": "Armanch Inc",
-            "languageCode": "en"
-        }
-    }
-]
 /**
  * @description This function exports the filtered search results to a CSV file.
  */
@@ -138,6 +96,10 @@ const testObject = [
                 label: 'Name',
                 value: 'displayName.text',
             },
+            {
+                label: 'Phone Number',
+                value: 'nationalPhoneNumber',
+            }
         ],
         header: true,
     }
@@ -173,13 +135,19 @@ const testObject = [
             No results found, atm the moment.
         </p>
         <div v-if="displayFiltered">
-            <PlacesCard v-for="place in filteredResults" :key="filteredResults.indexOf(place)"
-                :displayName="place.displayName.text" :formattedAddress="place.formattedAddress"
+            <PlacesCard v-for="place in filteredResults"
+                :key="filteredResults.indexOf(place)"
+                :displayName="place.displayName.text"
+                :formattedAddress="place.formattedAddress"
+                :phoneNumber="place.nationalPhoneNumber"
                 :websiteUri="place.websiteUri" />
         </div>
         <div v-else>
-            <PlacesCard v-for="place in results.places" :key="results.places.indexOf(place)"
-                :displayName="place.displayName.text" :formattedAddress="place.formattedAddress"
+            <PlacesCard v-for="place in results.places"
+                :key="results.places.indexOf(place)"
+                :displayName="place.displayName.text"
+                :formattedAddress="place.formattedAddress"
+                :phoneNumber="place.nationalPhoneNumber"
                 :websiteUri="place.websiteUri" />
         </div>
     </section>
