@@ -117,19 +117,17 @@ const searchPlaces = () => {
 </script>
 
 <template>
-    <form class="pure-form" v-on:submit.prevent="searchPlaces">
-        <fieldset>
-            <legend>Places Finder</legend>
+    <form class="form" v-on:submit.prevent="searchPlaces">
+        <fieldset class="">
             <input type="text" v-model="search" placeholder="Search for places" />
             <input type="text" v-model="postalCode" placeholder="Enter postal code" />
-            <button type="submit" class="pure-button pure-button-primary">Search</button>
-            <button class="pure-button pure-button-primary"
-                @click="filterPlaces(), displayFiltered = !displayFiltered">Filter
+            <button type="submit" class="form-btn">Search</button>
+            <button class="form-btn" @click="filterPlaces(), displayFiltered = !displayFiltered">Filter
             </button>
-            <button v-if="displayFiltered" class="pure-button button-success" @click="dataCsvExport" >Export to CSV</button>
         </fieldset>
     </form>
-    <section>
+    <section class="section">
+        <button v-if="displayFiltered" class="csv-btn warning" @click="dataCsvExport" >Export to CSV</button>
         <h2>Results</h2>
         <p v-if="results.length  <= 0" >
             No results found, atm the moment.
@@ -154,7 +152,34 @@ const searchPlaces = () => {
 </template>
 
 <style scoped>
-.pure-button-primary {
-    margin: 0 5px;
+
+.form {
+    margin-top: 6rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 1rem;
+    display: flex;
+}
+
+.form input {
+    margin-right: 1rem;
+    width: 250px;
+}
+
+.form-btn {
+    width: 100px;
+    margin: 0 1rem;
+}
+
+.csv-btn {
+    width: 300px;
+    margin: 0 auto;
+}
+
+.section {
+    margin-top: 1rem;
+    width: 720px;
+    display: flex;
+    flex-direction: column;
 }
 </style>
