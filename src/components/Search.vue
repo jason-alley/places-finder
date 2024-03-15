@@ -4,12 +4,13 @@ import { Parser } from '@json2csv/plainjs';
 
 import { ref, onMounted } from 'vue';
 
+const API_KEY = import.meta.env.VITE_API_KEY;
+
 const search = ref('');
 const postalCode = ref('');
 const results = ref([]);
 let filteredResults = ref([]);
 let displayFiltered = ref(false);
-
 
 onMounted(() => {
     // on mounted clear local storage.
@@ -42,7 +43,7 @@ const filterPlaces = () => {
  * @description This function makes a request to the Google Places API to search for places based on the users input, then returns and array of places with the defined fields.
  */
 const searchPlaces = () => {
-    const apiKey = 'AIzaSyAEAPVrCILuoMxjcn0V2sVS_qVgJ6LFsDQ';
+    const apiKey = API_KEY;
     const url = 'https://places.googleapis.com/v1/places:searchText';
     const requestBody = {
         textQuery: search.value,
