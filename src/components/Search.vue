@@ -130,7 +130,7 @@ const searchPlaces = () => {
         <button v-if="displayFiltered" class="csv-btn warning" @click="dataCsvExport" >Export to CSV</button>
         <h2>Results</h2>
         <p v-if="results.length  <= 0" >
-            No results found, atm the moment.
+            No results found at the moment.
         </p>
         <div v-if="displayFiltered">
             <PlacesCard v-for="place in filteredResults"
