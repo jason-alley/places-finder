@@ -26,7 +26,7 @@ onMounted(() => {
  */
 const filterPlaces = () => {
     // Split the postal code string into an array of postal codes
-    const newPostalCodes = postalCode.value.split(',');
+    const newPostalCodes =  postalCode.value.toUpperCase().split(',');
 
     // Filter the places based on whether any postal code in the array is included in the place's formatted address
     const filteredData = results.value.places.filter(place => newPostalCodes.some(postalCode => place.formattedAddress.includes(postalCode)));
@@ -34,7 +34,6 @@ const filterPlaces = () => {
     // Update the filtered results with the filtered data
     filteredResults.value = filteredData;
 
-    console.log(filteredResults.value);
     // Return the filtered data
     return filteredData, filteredResults.value;
 };
